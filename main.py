@@ -28,7 +28,7 @@ def main_VAE():
 
     train_loader, test_loader = get_mnist_dataloaders(batch_size=128)
 
-    vae = build_vae(latent_dim=32, mode ="pp")
+    vae = build_vae(latent_dim=32, mode="pp")
 
     print("Start training")
     train_vae(vae, train_loader, test_loader, num_epochs=50, learning_rate=1e-3, latent_dim=32, device=device)
