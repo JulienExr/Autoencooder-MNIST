@@ -2,13 +2,22 @@
 
 This repository contains simple PyTorch implementations of an Autoencoder (AE) and a Variational Autoencoder (VAE) trained on MNIST. The code is minimal and focused on experiments: training, latent-space inspection, reconstructions, interpolation (2 → 5), and sampling from the latent space.
 
+## Table of contents
+
+- [Quick project layout](#quick-project-layout)
+- [Autoencoder (AE) -- summary and visualizations](#autoencoder-ae----summary-and-visualizations)
+- [Variational Autoencoder (VAE) -- summary and visualizations](#variational-autoencoder-vae----summary-and-visualizations)
+- [Fashion-MNIST example renders](#fashion-mnist-example-renders)
+- [Usage instructions](#usage-instructions)
+- [Small tips](#small-tips)
+
 ## Quick project layout
 
 - `ae.py` -- AE model (encoder + decoder).
 - `vae.py` -- VAE model (probabilistic encoder producing μ and logvar + decoder). Two encoder/decoder variants exist (`default` and `pp`).
 - `training.py` -- training loops for AE and VAE. Visualization is called automatically from here each epoch via `Visualiser`.
 - `main.py` -- example entry points. By default it runs AE training then VAE training (see note below).
-- `visu.py` -- `Visualiser` helper used by `training.py` to save reconstructions, PCA plots, interpolations and noise samples into `visu/`.
+- `visualisation.py` -- `Visualiser` helper used by `training.py` to save reconstructions, PCA plots, interpolations and noise samples into `visu/`.
 - `data.py` -- MNIST dataloader helpers.
 - `model/AE/`, `model/VAE/` -- expected checkpoints are saved here (encoder/decoder state dicts).
 
@@ -97,9 +106,36 @@ Example placeholders:
 
 - These samples should look more digit-like than AE noise samples because the VAE latent is regularized toward the Gaussian prior.
 
+## Fashion-MNIST example renders
+
+Below are example placeholders from the Fashion-MNIST dataset. This dataset is more complex than MNIST, so reconstructions and latent embeddings can look less clean. 
+
+<figure style="text-align: center;">
+  <img src="demo/fashion_recon_ae_20.png" alt="Fashion-MNIST AE reconstructions" style="max-width: 100%;" />
+  <figcaption style="font-style: italic;">Figure: Fashion-MNIST AE reconstructions after 20 epochs.</figcaption>
+</figure>
+
+<figure style="text-align: center;">
+  <img src="demo/fashion_pca_vae_50.png" alt="Fashion-MNIST VAE PCA" style="max-width: 100%;" />
+  <figcaption style="font-style: italic;">Figure: Fashion-MNIST VAE PCA after 50 epochs.</figcaption>
+</figure>
+
+<figure style="text-align: center;">
+  <img src="demo/fashion_noise_vae_50.png" alt="Fashion-MNIST VAE sampling" style="max-width: 100%;" />
+  <figcaption style="font-style: italic;">Figure: Fashion-MNIST VAE samples drawn from the latent prior.</figcaption>
+</figure>
+
 ## Usage instructions
 
-1. Create and activate a virtual environment :
+1. Clone the repository
+
+```bash
+git clone git@github.com:JulienExr/Autoencoder-MNIST.git
+(HTTPS : git clone https://github.com/JulienExr/Autoencoder-MNIST.git)
+cd Autoencoder-MNIST
+```
+
+2. Create and activate a virtual environment :
 
 ```bash
 python3 -m venv .venv
@@ -107,25 +143,34 @@ source .venv/bin/activate
 pip install -r requirements.txt
 ```
 
-2. Prepare data
+3. Prepare data
 
 MNIST will be downloaded automatically by `torchvision` into `./data` when you run training.
 
-3. Run training
+4. Run training (CLI)
+
+`main.py` you can choose the model, dataset, and latent dimension:
 
 ```bash
-python main.py
+python main.py --model AE --dataset mnist --latent_dim 256
+python main.py --model VAE --dataset mnist --latent_dim 32
 ```
 
-- Default behavior: `main.py` triggers AE training first, then VAE training.
-- To run only one model, edit `main.py` and comment out the unwanted call (for example comment `main_VAE()` to train only the AE).
+Dataset options:
+- `mnist` (default)
+- `fashion_mnist` (more challenging, grayscale clothing items)
+
+Example with Fashion-MNIST:
+
+```bash
+python main.py --model VAE --dataset fashion_mnist --latent_dim 128
+```
 
 4. Outputs
 
 - Model checkpoints are saved under `model/AE/` and `model/VAE/` (encoder/decoder state dicts).
-- Visual outputs are saved under `visu/<model_name>/` with subfolders `recon`, `pca`, `umap`, `interp`, and `noise`.
+- Visual outputs are saved under `visu/<dataset>_<model>/` with subfolders `recon`, `pca`, `umap`, `interp`, and `noise`.
 
 ## Small tips
 
-- AE latent dim defaults to 256; `main.py` calls VAE with latent_dim=32 and `mode="pp"` (a slightly deeper variant).
 - The VAE training schedule in `training.py` uses a small beta early on and ramps it; tweak that schedule if you want sharper reconstructions vs tighter latent.
